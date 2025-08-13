@@ -22,6 +22,8 @@ export interface Task {
   recurringStartDate?: string;
   recurringEndDate?: string;
   recurringIndeterminate?: boolean;
+  isTemplate?: boolean;
+  templateId?: string;
 }
 
 interface TaskContextType {
@@ -34,6 +36,13 @@ interface TaskContextType {
   updateCategory: (id: string, category: Partial<Category>) => void;
   deleteCategory: (id: string) => void;
   getTodayTasks: () => Task[];
+  addExistingTaskForDate: (taskId: string, date: string) => void;
+  addExistingTaskForRange: (taskId: string, startDate: string, endDate: string) => void;
+  getTemplates: () => Task[];
+  createTaskFromTemplate: (templateId: string, date: string) => void;
+  createTaskFromTemplateRange: (templateId: string, startDate: string, endDate: string) => void;
+  updateTemplate: (templateId: string, updates: Partial<Task>) => void;
+  deleteTemplate: (templateId: string) => void;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -58,7 +67,18 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onValue(tasksRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        setTasks(Object.values(data));
+        const tasksList = Object.values(data) as Task[];
+        
+        // Migrar tareas sin isTemplate definido
+        tasksList.forEach((task: Task) => {
+          if (task.isTemplate === undefined) {
+            console.log('[MIGRATION] Setting isTemplate: false for task:', task.title);
+            const taskRef = ref(db, `users/${user.id}/tasks/${task.id}`);
+            update(taskRef, { isTemplate: false });
+          }
+        });
+        
+        setTasks(tasksList);
       } else {
         setTasks([]);
       }
@@ -157,6 +177,130 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return [...recurrent, ...normales];
   };
 
+  const addExistingTaskForDate = (taskId: string, date: string) => {
+    const originalTask = tasks.find(task => task.id === taskId);
+    if (!originalTask || !user) return;
+
+    // Si la tarea original no es una plantilla, la convertimos en plantilla
+    if (originalTask.isTemplate !== true) {
+      updateTask(originalTask.id, { isTemplate: true });
+    }
+
+    const newTask: Omit<Task, 'id'> = {
+      title: originalTask.title,
+      categoryId: originalTask.categoryId,
+      date: date,
+      isRecurring: false,
+      recurringDays: [],
+      priority: originalTask.priority,
+      duration: originalTask.duration,
+      cronometrado: originalTask.cronometrado,
+      templateId: originalTask.id,
+      isTemplate: false,
+    };
+
+    addTask(newTask);
+  };
+
+  const addExistingTaskForRange = (taskId: string, startDate: string, endDate: string) => {
+    const originalTask = tasks.find(task => task.id === taskId);
+    if (!originalTask || !user) return;
+
+    // Si la tarea original no es una plantilla, la convertimos en plantilla
+    if (originalTask.isTemplate !== true) {
+      updateTask(originalTask.id, { isTemplate: true });
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const dateStr = d.toISOString().split('T')[0];
+      
+      const newTask: Omit<Task, 'id'> = {
+        title: originalTask.title,
+        categoryId: originalTask.categoryId,
+        date: dateStr,
+        isRecurring: false,
+        recurringDays: [],
+        priority: originalTask.priority,
+        duration: originalTask.duration,
+        cronometrado: originalTask.cronometrado,
+        templateId: originalTask.id,
+        isTemplate: false,
+      };
+
+      addTask(newTask);
+    }
+  };
+
+  const getTemplates = (): Task[] => {
+    return tasks.filter(task => task.isTemplate === true);
+  };
+
+  const createTaskFromTemplate = (templateId: string, date: string) => {
+    const template = tasks.find(task => task.id === templateId && task.isTemplate === true);
+    if (!template || !user) return;
+
+    const newTask: Omit<Task, 'id'> = {
+      title: template.title,
+      categoryId: template.categoryId,
+      date: date,
+      isRecurring: false,
+      recurringDays: [],
+      priority: template.priority,
+      duration: template.duration,
+      cronometrado: template.cronometrado,
+      templateId: templateId,
+      isTemplate: false,
+    };
+
+    addTask(newTask);
+  };
+
+  const createTaskFromTemplateRange = (templateId: string, startDate: string, endDate: string) => {
+    const template = tasks.find(task => task.id === templateId && task.isTemplate === true);
+    if (!template || !user) return;
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const dateStr = d.toISOString().split('T')[0];
+      
+      const newTask: Omit<Task, 'id'> = {
+        title: template.title,
+        categoryId: template.categoryId,
+        date: dateStr,
+        isRecurring: false,
+        recurringDays: [],
+        priority: template.priority,
+        duration: template.duration,
+        cronometrado: template.cronometrado,
+        templateId: templateId,
+        isTemplate: false,
+      };
+
+      addTask(newTask);
+    }
+  };
+
+  const updateTemplate = (templateId: string, updates: Partial<Task>) => {
+    if (!user) return;
+    updateTask(templateId, updates);
+  };
+
+  const deleteTemplate = (templateId: string) => {
+    if (!user) return;
+    
+    // Eliminar todas las instancias de la plantilla
+    const instancesToDelete = tasks.filter(task => task.templateId === templateId);
+    instancesToDelete.forEach(task => deleteTask(task.id));
+    
+    // Eliminar la plantilla
+    deleteTask(templateId);
+  };
+
   return (
     <TaskContext.Provider value={{
       tasks,
@@ -167,7 +311,14 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       addCategory,
       updateCategory,
       deleteCategory,
-      getTodayTasks
+      getTodayTasks,
+      addExistingTaskForDate,
+      addExistingTaskForRange,
+      getTemplates,
+      createTaskFromTemplate,
+      createTaskFromTemplateRange,
+      updateTemplate,
+      deleteTemplate
     }}>
       {children}
     </TaskContext.Provider>

@@ -1,0 +1,6 @@
+- Haz uso de buenas practicas.
+- Refactoriza el código cada vez que puedas
+- No comentes el codigo
+- Utiliza el nombre de la variable que se refiere
+- Trata de reutilizar el codigo y componentes en las interfaces
+- Todos los token, api key, etc. Deben ir en el archivo .env

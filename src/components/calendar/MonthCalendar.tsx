@@ -138,15 +138,15 @@ const MonthCalendar: React.FC<MonthCalendarProps> = ({ selectedDate, onSelectDat
                     type="button"
                   >
                     <span className={`text-sm font-medium ${isToday ? 'text-indigo-600 dark:text-indigo-400' : ''}`}>{date.getDate()}</span>
-                    <div className="flex flex-wrap gap-1 mt-1 justify-center">
-                      {getTasksForDate(tasks, dateStr).map((task, i) => {
+                    <div className="flex flex-wrap gap-0.5 mt-1 justify-center">
+                      {getTasksForDate(tasks, dateStr).slice(0, 4).map((task, i) => {
                         const cat = categories.find(c => c.id === task.categoryId);
                         const color = cat ? cat.color : '#a3a3a3';
                         return (
                           <span
                             key={i}
                             title={task.title}
-                            className="w-4 h-4 rounded-full border-2 border-white dark:border-gray-800"
+                            className="w-2.5 h-2.5 rounded-full border border-white dark:border-gray-800"
                             style={{ backgroundColor: color }}
                           />
                         );

@@ -3,14 +3,7 @@ import { getLocalDayOfWeek } from './getLocalDayOfWeek';
 
 export function getTasksForDate(tasks: Task[], dateStr: string): Task[] {
   const dayOfWeek = getLocalDayOfWeek(dateStr);
-  if (typeof window !== 'undefined') {
-    console.log('[getTasksForDate] dateStr:', dateStr, 'dayOfWeek:', dayOfWeek);
-    tasks.forEach(task => {
-      if (task.isRecurring) {
-        console.log('  Tarea recurrente:', task.title, 'recurringDays:', task.recurringDays);
-      }
-    });
-  }
+  // ...
   const normalTasks = tasks.filter(
     task => !task.isRecurring && task.date === dateStr
   );

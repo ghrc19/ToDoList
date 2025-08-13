@@ -3,8 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { auth } from '../firebase';
 import { updatePassword, signOut } from 'firebase/auth';
 import { useTheme } from '../context/ThemeContext';
-import { SunIcon, MoonIcon, SaveIcon } from 'lucide-react';
+import { SunIcon, MoonIcon, AlertTriangle } from 'lucide-react';
+import UserProfileSection from '../components/settings/UserProfileSection';
+import PasswordSection from '../components/settings/PasswordSection';
+import NotificationsSection from '../components/settings/NotificationsSection';
 import { EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
+import PreferencesSection from '../components/settings/PreferencesSection';
 const Settings: React.FC = () => {
   const {
     user,
@@ -58,15 +62,28 @@ const Settings: React.FC = () => {
   const handleNotificationToggle = () => {
     setNotificationSetting((prev) => {
       const newValue = !prev;
-      localStorage.setItem('notifications', newValue.toString());
       if (newValue && typeof window !== 'undefined' && 'Notification' in window) {
         if (Notification.permission === 'default') {
           Notification.requestPermission().then((perm) => {
             setNotificationPermission(perm);
+            if (perm === 'granted') {
+              localStorage.setItem('notifications', 'true');
+            } else {
+              localStorage.setItem('notifications', 'false');
+            }
+          });
+          return prev;
+        } else if (Notification.permission === 'granted') {
+          localStorage.setItem('notifications', 'true');
+          new Notification('Notificaciones activadas', {
+            body: 'Recibirás recordatorios de tus tareas.',
+            icon: '/icono.png'
           });
         } else {
-          setNotificationPermission(Notification.permission);
+          localStorage.setItem('notifications', 'false');
         }
+      } else {
+        localStorage.setItem('notifications', newValue.toString());
       }
       return newValue;
     });
@@ -77,149 +94,29 @@ const Settings: React.FC = () => {
       <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
         Configuración
       </h2>
-      {showSuccessMsg && <div className="mb-6 p-4 bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
-          <p className="text-green-700 dark:text-green-300">
-            Cambios guardados correctamente
-          </p>
-        </div>}
-      {notificationPermission === 'denied' && (
-        <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-red-700 dark:text-red-300 text-sm">
-            Has denegado el permiso de notificaciones en el navegador. Puedes cambiarlo desde la configuración del navegador si deseas recibir notificaciones.
-          </p>
-        </div>
-      )}
-      {notificationPermission === 'granted' && (
-        <div className="mb-4 p-3 bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
-          <p className="text-green-700 dark:text-green-300 text-sm">
-            Permiso de notificaciones activado correctamente.
-          </p>
-        </div>
-      )}
-  <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-          Perfil de usuario
-        </h3>
-        <form onSubmit={handleProfileSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Nombre
-              </label>
-              <input id="name" type="text" value={name} onChange={e => setName(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Correo electrónico
-              </label>
-              <input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <button type="submit" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm font-medium flex items-center">
-              <SaveIcon className="w-4 h-4 mr-2" />
-              Guardar cambios
-            </button>
-          </div>
-        </form>
-      </div>
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-          Cambiar contraseña
-        </h3>
-        <form onSubmit={handlePasswordSubmit}>
-          <div className="space-y-4 mb-6">
-            {passwordError && <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded text-red-700 dark:text-red-300 text-sm">{passwordError}</div>}
-            <div>
-              <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Contraseña actual
-              </label>
-              <input id="current-password" type="password" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" autoComplete="current-password" />
-            </div>
-            <div>
-              <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Nueva contraseña
-              </label>
-              <input id="new-password" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
-            </div>
-            <div>
-              <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Confirmar nueva contraseña
-              </label>
-              <input id="confirm-password" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <button type="submit" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm font-medium">
-              Actualizar contraseña
-            </button>
-          </div>
-        </form>
-      </div>
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-          Preferencias
-        </h3>
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Tema
-              </h4>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Cambiar entre modo claro y oscuro
-              </p>
-            </div>
-            <button onClick={toggleTheme} className="flex items-center px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-md">
-              {theme === 'light' ? <>
-                  <SunIcon className="w-5 h-5 text-amber-500 mr-2" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Modo claro
-                  </span>
-                </> : <>
-                  <MoonIcon className="w-5 h-5 text-indigo-400 mr-2" />
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Modo oscuro
-                  </span>
-                </>}
-            </button>
-          </div>
-          <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-            <div>
-              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                Notificaciones
-              </h4>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Recibir recordatorios de tareas
-              </p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={notificationSetting}
-                onChange={handleNotificationToggle}
-                className="sr-only peer"
-              />
-              <div
-                className={
-                  `w-12 h-7 flex items-center rounded-full p-1 duration-300 transition-colors
-                  ${notificationSetting ? 'bg-blue-200 dark:bg-blue-400' : 'bg-gray-300 dark:bg-gray-600'}`
-                }
-              >
-                <div
-                  className={
-                    `bg-white w-5 h-5 rounded-full shadow-md transform duration-300 transition-transform
-                    ${notificationSetting ? 'translate-x-5' : 'translate-x-0'}`
-                  }
-                />
-              </div>
-              <span className={`ml-3 text-sm font-medium ${notificationSetting ? 'text-blue-700 dark:text-blue-200' : 'text-gray-600 dark:text-gray-300'}`}>
-                {notificationSetting ? 'Activadas' : 'Desactivadas'}
-              </span>
-            </label>
-          </div>
-        </div>
-      </div>
+      <UserProfileSection
+        name={name}
+        email={email}
+        onNameChange={e => setName(e.target.value)}
+        onEmailChange={e => setEmail(e.target.value)}
+        onSubmit={handleProfileSubmit}
+      />
+      <PasswordSection
+        currentPassword={currentPassword}
+        newPassword={newPassword}
+        confirmPassword={confirmPassword}
+        passwordError={passwordError}
+        onCurrentPasswordChange={e => setCurrentPassword(e.target.value)}
+        onNewPasswordChange={e => setNewPassword(e.target.value)}
+        onConfirmPasswordChange={e => setConfirmPassword(e.target.value)}
+        onSubmit={handlePasswordSubmit}
+      />
+  <PreferencesSection
+    theme={theme}
+    toggleTheme={toggleTheme}
+    notificationSetting={notificationSetting}
+    handleNotificationToggle={handleNotificationToggle}
+  />
     <div className="mt-8 flex flex-col items-center">
       <button
         onClick={() => setShowDeleteModal(true)}
@@ -228,53 +125,63 @@ const Settings: React.FC = () => {
         Eliminar cuenta
       </button>
       {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 w-full max-w-md relative">
-            <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200" onClick={() => { setShowDeleteModal(false); setDeletePassword(''); setDeleteError(''); }}>&times;</button>
-            <h2 className="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Eliminar cuenta</h2>
-            <p className="mb-4 text-gray-700 dark:text-gray-300">Esta acción es irreversible. Ingresa tu contraseña para confirmar la eliminación de tu cuenta.</p>
-            <input
-              type="password"
-              placeholder="Contraseña"
-              className="mb-3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 w-full"
-              value={deletePassword}
-              onChange={e => setDeletePassword(e.target.value)}
-              autoComplete="off"
-            />
-            {deleteError && <div className="mb-2 text-red-600 text-sm">{deleteError}</div>}
-            {deleteSuccess && <div className="mb-2 text-green-600 text-sm">Cuenta eliminada correctamente. Redirigiendo...</div>}
-            <div className="flex justify-end gap-2">
-              <button onClick={() => { setShowDeleteModal(false); setDeletePassword(''); setDeleteError(''); }} className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">Cancelar</button>
-              <button
-                onClick={async () => {
-                  if (!user) return;
-                  if (!deletePassword) {
-                    setDeleteError('Por favor, ingresa tu contraseña.');
-                    return;
-                  }
-                  try {
-                    if (auth.currentUser && auth.currentUser.email) {
-                      const credential = EmailAuthProvider.credential(auth.currentUser.email, deletePassword);
-                      await reauthenticateWithCredential(auth.currentUser, credential);
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border-2 border-red-400 dark:border-red-700 p-0 w-full max-w-md relative animate-dialog-pop overflow-hidden">
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+              <AlertTriangle className="w-60 h-60 text-red-100 dark:text-red-900 opacity-20" />
+            </div>
+            <button className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-3xl font-bold z-10" onClick={() => { setShowDeleteModal(false); setDeletePassword(''); setDeleteError(''); }}>&times;</button>
+            <div className="flex flex-col items-center pt-8 pb-2 px-8 relative z-10">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-800 shadow mb-3">
+                <AlertTriangle className="h-8 w-8 text-red-500 dark:text-red-200" />
+              </div>
+              <h3 className="text-2xl font-bold mb-1 text-red-700 dark:text-red-200">Eliminar cuenta</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 text-center">Esta acción es <span className="font-bold text-red-600 dark:text-red-300">irreversible</span>. Ingresa tu contraseña para confirmar la eliminación de tu cuenta.</p>
+            </div>
+            <div className="px-8 pb-8 relative z-10">
+              <input
+                type="password"
+                placeholder="Contraseña"
+                className="mb-3 px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 w-full"
+                value={deletePassword}
+                onChange={e => setDeletePassword(e.target.value)}
+                autoComplete="off"
+              />
+              {deleteError && <div className="mb-2 text-red-600 text-sm font-semibold flex items-center gap-2"><AlertTriangle className="w-4 h-4" />{deleteError}</div>}
+              {deleteSuccess && <div className="mb-2 text-green-600 text-sm font-semibold">Cuenta eliminada correctamente. Redirigiendo...</div>}
+              <div className="flex gap-3 mt-2">
+                <button onClick={() => { setShowDeleteModal(false); setDeletePassword(''); setDeleteError(''); }} className="w-1/2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-xl py-3 font-semibold transition">Cancelar</button>
+                <button
+                  onClick={async () => {
+                    if (!user) return;
+                    if (!deletePassword) {
+                      setDeleteError('Por favor, ingresa tu contraseña.');
+                      return;
                     }
-                    const { ref, remove } = await import('firebase/database');
-                    const { db } = await import('../firebase');
-                    await remove(ref(db, `users/${user.id}`));
-                    await auth.currentUser?.delete();
-                    await logout();
-                    setDeleteSuccess(true);
-                    setTimeout(() => {
-                      window.location.href = '/login';
-                    }, 1800);
-                  } catch (err: any) {
-                    setDeleteError(err?.message || 'Error al eliminar la cuenta.');
-                  }
-                }}
-                className="px-4 py-2 rounded bg-red-600 text-white font-semibold hover:bg-red-700"
-                disabled={deleteSuccess}
-              >
-                Confirmar eliminación
-              </button>
+                    try {
+                      if (auth.currentUser && auth.currentUser.email) {
+                        const credential = EmailAuthProvider.credential(auth.currentUser.email, deletePassword);
+                        await reauthenticateWithCredential(auth.currentUser, credential);
+                      }
+                      const { ref, remove } = await import('firebase/database');
+                      const { db } = await import('../firebase');
+                      await remove(ref(db, `users/${user.id}`));
+                      await auth.currentUser?.delete();
+                      await logout();
+                      setDeleteSuccess(true);
+                      setTimeout(() => {
+                        window.location.href = '/login';
+                      }, 1800);
+                    } catch (err: any) {
+                      setDeleteError(err?.message || 'Error al eliminar la cuenta.');
+                    }
+                  }}
+                  className="w-1/2 bg-red-600 text-white font-semibold hover:bg-red-700 rounded-xl py-3 transition"
+                  disabled={deleteSuccess}
+                >
+                  Confirmar eliminación
+                </button>
+              </div>
             </div>
           </div>
         </div>

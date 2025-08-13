@@ -1,17 +1,30 @@
 import React, { useState } from 'react';
 import { useTask } from '../../context/TaskContext';
 import { useAuth } from '../../context/AuthContext';
-import { XIcon, CalendarIcon, RepeatIcon } from 'lucide-react';
+import { XIcon, CalendarIcon, RepeatIcon, ListTodoIcon, ClipboardListIcon } from 'lucide-react';
 
 interface AddTaskFormProps {
   onClose: (created?: boolean) => void;
+  initialTask?: Partial<{
+    title: string;
+    categoryId: string;
+    isRecurring: boolean;
+    recurringDays: number[];
+    priority: 'low' | 'medium' | 'high';
+    duration: number;
+    cronometrado: boolean;
+    recurringIndeterminate: boolean;
+    recurringStartDate: string;
+    recurringEndDate: string;
+  }>;
+  initialDate?: string;
 }
 
-const AddTaskForm: React.FC<AddTaskFormProps> = ({ onClose }) => {
+const AddTaskForm: React.FC<AddTaskFormProps> = ({ onClose, initialTask, initialDate }) => {
   const { addTask, categories } = useTask();
   const { user } = useAuth();
-  const [title, setTitle] = useState('');
-  const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [title, setTitle] = useState(initialTask?.title || '');
+  const [categoryId, setCategoryId] = useState<string | null>(initialTask?.categoryId || null);
 
   function getLocalDateStr() {
     const now = new Date();
@@ -20,14 +33,14 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onClose }) => {
     const day = String(now.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
-  const [date, setDate] = useState(getLocalDateStr());
-  const [isRecurring, setIsRecurring] = useState(false);
-  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>('medium');
-  const [duration, setDuration] = useState(60);
-  const [cronometrado, setCronometrado] = useState(false);
-  const [recurringIndeterminate, setRecurringIndeterminate] = useState(true);
-  const [recurringStartDate, setRecurringStartDate] = useState(date);
-  const [recurringEndDate, setRecurringEndDate] = useState('');
+  const [date, setDate] = useState(initialDate || getLocalDateStr());
+  const [isRecurring, setIsRecurring] = useState(initialTask?.isRecurring || false);
+  const [priority, setPriority] = useState<'low' | 'medium' | 'high'>(initialTask?.priority || 'medium');
+  const [duration, setDuration] = useState(initialTask?.duration ?? 60);
+  const [cronometrado, setCronometrado] = useState(initialTask?.cronometrado || false);
+  const [recurringIndeterminate, setRecurringIndeterminate] = useState(initialTask?.recurringIndeterminate ?? true);
+  const [recurringStartDate, setRecurringStartDate] = useState(initialTask?.recurringStartDate || date);
+  const [recurringEndDate, setRecurringEndDate] = useState(initialTask?.recurringEndDate || '');
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -67,6 +80,7 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onClose }) => {
       priority,
       duration: Number(duration) || 0,
       cronometrado,
+      isTemplate: false,
       recurringIndeterminate: isRecurring ? recurringIndeterminate : undefined,
       recurringStartDate: isRecurring && !recurringIndeterminate ? recurringStartDate : undefined,
       recurringEndDate: isRecurring && !recurringIndeterminate ? recurringEndDate : undefined,
@@ -75,20 +89,27 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onClose }) => {
   };
 
   const daysOfWeek = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-  const [recurringDays, setRecurringDays] = useState<number[]>([]);
+  const [recurringDays, setRecurringDays] = useState<number[]>(initialTask?.recurringDays || []);
   const selectAllDays = () => setRecurringDays([0,1,2,3,4,5,6]);
   const selectLaborables = () => setRecurringDays([1,2,3,4,5]);
   const selectWeekends = () => setRecurringDays([0,6]);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-6">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Nueva tarea</h3>
-        <button onClick={() => onClose(false)} className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300">
-          <XIcon className="w-5 h-5" />
+    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border-2 border-indigo-400 dark:border-indigo-700 p-0 w-full max-w-lg max-h-[90vh] flex flex-col relative overflow-hidden">
+      {/* Icono de fondo decorativo */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+        <ClipboardListIcon className="w-[350px] h-[350px] text-indigo-100 dark:text-indigo-900 opacity-10" />
+      </div>
+      <div className="flex items-center gap-3 justify-between px-8 py-5 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-t-2xl relative z-10">
+        <div className="flex items-center gap-3">
+          <ListTodoIcon className="w-7 h-7 text-white drop-shadow" />
+          <h3 className="text-2xl font-bold text-white tracking-tight">Nueva tarea</h3>
+        </div>
+        <button onClick={() => onClose(false)} className="text-white hover:text-gray-200 transition-colors p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-white">
+          <XIcon className="w-7 h-7" />
         </button>
       </div>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-8 py-6 bg-white dark:bg-gray-900 rounded-b-2xl min-h-[200px] custom-scrollbar relative z-10">
         {error && <div className="mb-2 text-red-600 text-sm font-semibold">{error}</div>}
         <div className="space-y-4">
           <div>
@@ -192,9 +213,9 @@ const AddTaskForm: React.FC<AddTaskFormProps> = ({ onClose }) => {
             )}
           </div>
         </div>
-        <div className="mt-6 flex justify-end space-x-3">
-          <button type="button" onClick={() => onClose(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Cancelar</button>
-          <button type="submit" className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50" disabled={!user}>Guardar tarea</button>
+        <div className="mt-8 flex gap-3 justify-end">
+          <button type="button" onClick={() => onClose(false)} className="w-1/2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-xl py-3 font-semibold transition">Cancelar</button>
+          <button type="submit" className="w-1/2 bg-indigo-600 text-white font-semibold hover:bg-indigo-700 rounded-xl py-3 transition disabled:opacity-50" disabled={!user}>Guardar tarea</button>
         </div>
       </form>
     </div>
