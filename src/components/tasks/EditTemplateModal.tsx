@@ -13,7 +13,6 @@ const EditTemplateModal: React.FC<EditTemplateModalProps> = ({ template, onClose
   const [applyToAll, setApplyToAll] = useState(false);
   const [showForm, setShowForm] = useState(false);
 
-  // Contar instancias de esta plantilla
   const instanceCount = tasks.filter(task => task.templateId === template.id).length;
 
   const handleEditConfirm = () => {
@@ -22,8 +21,6 @@ const EditTemplateModal: React.FC<EditTemplateModalProps> = ({ template, onClose
 
   const handleFormClose = (created?: boolean) => {
     if (created && applyToAll) {
-      // Aquí necesitaríamos una forma de obtener los datos actualizados
-      // Por ahora, cerraremos el modal
     }
     onClose();
   };

@@ -68,8 +68,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const data = snapshot.val();
       if (data) {
         const tasksList = Object.values(data) as Task[];
-        
-        // Migrar tareas sin isTemplate definido
         tasksList.forEach((task: Task) => {
           if (task.isTemplate === undefined) {
             console.log('[MIGRATION] Setting isTemplate: false for task:', task.title);
@@ -180,8 +178,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addExistingTaskForDate = (taskId: string, date: string) => {
     const originalTask = tasks.find(task => task.id === taskId);
     if (!originalTask || !user) return;
-
-    // Si la tarea original no es una plantilla, la convertimos en plantilla
     if (originalTask.isTemplate !== true) {
       updateTask(originalTask.id, { isTemplate: true });
     }
@@ -206,7 +202,6 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const originalTask = tasks.find(task => task.id === taskId);
     if (!originalTask || !user) return;
 
-    // Si la tarea original no es una plantilla, la convertimos en plantilla
     if (originalTask.isTemplate !== true) {
       updateTask(originalTask.id, { isTemplate: true });
     }
@@ -292,12 +287,8 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const deleteTemplate = (templateId: string) => {
     if (!user) return;
-    
-    // Eliminar todas las instancias de la plantilla
     const instancesToDelete = tasks.filter(task => task.templateId === templateId);
     instancesToDelete.forEach(task => deleteTask(task.id));
-    
-    // Eliminar la plantilla
     deleteTask(templateId);
   };
 

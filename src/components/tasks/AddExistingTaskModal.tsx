@@ -31,7 +31,6 @@ const AddExistingTaskModal: React.FC<AddExistingTaskModalProps> = ({ onClose, se
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in">
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border-2 border-indigo-400 dark:border-indigo-700 p-0 w-full max-w-lg h-[600px] flex flex-col relative overflow-hidden">
-        {/* Icono de fondo decorativo */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
           <ClipboardListIcon className="w-[350px] h-[350px] text-indigo-100 dark:text-indigo-900 opacity-10" />
         </div>
@@ -47,7 +46,6 @@ const AddExistingTaskModal: React.FC<AddExistingTaskModalProps> = ({ onClose, se
         <div className="flex-1 overflow-y-auto px-8 py-6 bg-white dark:bg-gray-900 relative z-10">
           {templates.length > 0 ? (
             <div className="space-y-4">
-              {/* Lista de plantillas */}
               <div className="space-y-2">
                 <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3">Selecciona una plantilla:</h4>
                 {templates.map(template => (
@@ -65,7 +63,6 @@ const AddExistingTaskModal: React.FC<AddExistingTaskModalProps> = ({ onClose, se
                 ))}
               </div>
 
-              {/* Opciones de agregado */}
               {selectedTemplate && (
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-4">
                   <h4 className="font-semibold text-gray-800 dark:text-gray-200">¿Cómo quieres agregarla?</h4>
@@ -96,7 +93,6 @@ const AddExistingTaskModal: React.FC<AddExistingTaskModalProps> = ({ onClose, se
                     </label>
                   </div>
 
-                  {/* Selector de rango de fechas */}
                   {addType === 'range' && (
                     <div className="space-y-3 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                       <div className="grid grid-cols-2 gap-3">
@@ -135,8 +131,6 @@ const AddExistingTaskModal: React.FC<AddExistingTaskModalProps> = ({ onClose, se
             </div>
           )}
         </div>
-        
-        {/* Footer con botones */}
         <div className="px-8 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-b-2xl relative z-10">
           <div className="flex gap-3 justify-end">
             <button

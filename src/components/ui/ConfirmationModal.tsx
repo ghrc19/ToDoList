@@ -53,7 +53,6 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 animate-fade-in">
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border-2 border-gray-200 dark:border-gray-700 p-0 w-full max-w-md mx-4 relative overflow-hidden">
-        {/* Header */}
         <div className={`flex items-center gap-3 justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r ${config.bgColor} rounded-t-2xl`}>
           <div className="flex items-center gap-3">
             <IconComponent className="w-6 h-6 text-white drop-shadow" />
@@ -66,8 +65,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             <XIcon className="w-6 h-6" />
           </button>
         </div>
-        
-        {/* Content */}
+
         <div className="p-6 space-y-4">
           <div className="flex items-start gap-4">
             <div className={`p-3 rounded-full bg-gray-100 dark:bg-gray-800 ${config.iconColor}`}>
@@ -92,8 +90,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             </div>
           </div>
         </div>
-        
-        {/* Footer */}
+
         <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 rounded-b-2xl">
           <div className="flex gap-3 justify-end">
             <button

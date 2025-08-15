@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { ListIcon } from 'lucide-react';
-// import TaskListManageModal from './TaskListManageModal';
 import TaskItem from './TaskItem';
 import AddExistingTaskModal from './AddExistingTaskModal';
 import { useTask } from '../../context/TaskContext';
@@ -14,7 +13,6 @@ const TaskList: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
   const [filterEstado, setFilterEstado] = useState<'Todas' | 'Pendientes' | 'Completadas'>('Todas');
   const [filterCategoria, setFilterCategoria] = useState<string>('Todas');
-  // const [showManageTasks, setShowManageTasks] = useState(false);
   const [showAddExistingTask, setShowAddExistingTask] = useState(false);
   function formatDateLocal(date: Date): string {
     const year = date.getFullYear();

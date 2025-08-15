@@ -190,7 +190,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       </div>
     </div>
   )}
-  {/* TaskListManageModal eliminado */}
   {showManageTasks && (
     <TaskListManageModal 
       onClose={() => setShowManageTasks(false)}

@@ -91,7 +91,6 @@ const PasswordSection: React.FC<PasswordSectionProps> = ({
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border-2 border-indigo-400 dark:border-indigo-700 p-0 w-full max-w-md relative animate-dialog-pop overflow-hidden">
-            {/* Fondo decorativo */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
               <LockIcon className="w-60 h-60 text-indigo-100 dark:text-indigo-900 opacity-20" />
             </div>

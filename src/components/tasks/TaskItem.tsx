@@ -20,7 +20,6 @@ const TaskItem: React.FC<TaskItemProps> = ({
   compact = false,
   selectedDate
 }) => {
-  // Eliminar estado dummy, no es necesario
   const {
     updateTask,
     deleteTask
@@ -64,7 +63,6 @@ const TaskItem: React.FC<TaskItemProps> = ({
     high: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
   };
 
-  // Temporizador robusto
   const initialSeconds = task.cronometrado && typeof task.duration === 'number' ? task.duration * 60 : 0;
   const [secondsLeft, setSecondsLeft] = useState<number>(initialSeconds);
   const [timerRunning, setTimerRunning] = useState(false);
@@ -79,7 +77,6 @@ const TaskItem: React.FC<TaskItemProps> = ({
     }
   }, []);
 
-  // Reiniciar temporizador si cambia la tarea
   useEffect(() => {
     setSecondsLeft(initialSeconds);
     setTimerRunning(false);
@@ -219,7 +216,6 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
   if (!compact) {
   }
-  // Definir color de texto óptimo según prioridad y modo
   let textColor = 'text-black dark:text-white';
   let background = '';
   if (task.priority) {

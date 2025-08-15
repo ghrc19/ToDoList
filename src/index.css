@@ -2,7 +2,6 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-/* Oculta la barra de scroll pero mantiene el scroll funcional */
 .task-list-scroll-hidden::-webkit-scrollbar {
 	display: none;
 }

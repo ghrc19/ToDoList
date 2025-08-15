@@ -12,7 +12,6 @@ const CategoryListManageModal: React.FC<CategoryListManageModalProps> = ({ onClo
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in">
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border-2 border-indigo-400 dark:border-indigo-700 p-0 w-full max-w-xl max-h-[90vh] flex flex-col relative overflow-hidden">
-        {/* Icono de fondo decorativo */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
           <FolderIcon className="w-[350px] h-[350px] text-indigo-100 dark:text-indigo-900 opacity-10" />
         </div>

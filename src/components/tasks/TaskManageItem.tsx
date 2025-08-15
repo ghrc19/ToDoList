@@ -35,7 +35,6 @@ const TaskManageItem: React.FC<TaskManageItemProps> = ({ task, onDuplicate, onEd
     updateTask(task.id, { isTemplate: true });
   };
 
-  // Contar instancias si es plantilla
   const instanceCount = isTemplate ? tasks.filter(t => t.templateId === task.id).length : 0;
 
   const priorityColors = {
@@ -110,7 +109,6 @@ const TaskManageItem: React.FC<TaskManageItemProps> = ({ task, onDuplicate, onEd
         </div>
       </div>
 
-      {/* Modal de confirmación para eliminar */}
       <ConfirmationModal
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
@@ -132,7 +130,6 @@ const TaskManageItem: React.FC<TaskManageItemProps> = ({ task, onDuplicate, onEd
         ]}
       />
 
-      {/* Modal de confirmación para convertir */}
       <ConfirmationModal
         isOpen={showConvertConfirm}
         onClose={() => setShowConvertConfirm(false)}

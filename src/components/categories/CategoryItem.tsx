@@ -84,8 +84,6 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
             </div>
           </>}
       </div>
-
-      {/* Modal de confirmación para eliminar categoría */}
       <ConfirmationModal
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}

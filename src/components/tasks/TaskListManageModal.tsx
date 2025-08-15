@@ -12,13 +12,11 @@ interface TaskListManageModalProps {
 const TaskListManageModal: React.FC<TaskListManageModalProps> = ({ onClose, onDuplicate, onEdit }) => {
   const { getTemplates, tasks } = useTask();
   const templates = getTemplates();
-  // Solo mostrar tareas que NO son plantillas Y que NO fueron creadas desde plantillas
   const nonTemplates = tasks.filter(task => task.isTemplate !== true && !task.templateId);
   
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in">
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border-2 border-indigo-400 dark:border-indigo-700 p-0 w-full max-w-xl h-[600px] flex flex-col relative overflow-hidden">
-        {/* Icono de fondo decorativo */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
           <ClipboardListIcon className="w-[350px] h-[350px] text-indigo-100 dark:text-indigo-900 opacity-10" />
         </div>
@@ -33,7 +31,6 @@ const TaskListManageModal: React.FC<TaskListManageModalProps> = ({ onClose, onDu
         </div>
         <div className="flex-1 overflow-y-auto px-8 py-6 bg-white dark:bg-gray-900 rounded-b-2xl custom-scrollbar relative z-10">
           <div className="space-y-6">
-            {/* Sección de plantillas */}
             {templates.length > 0 && (
               <div className="space-y-4">
                 <h4 className="font-semibold text-gray-800 dark:text-gray-200 text-lg">Plantillas existentes:</h4>
@@ -48,8 +45,7 @@ const TaskListManageModal: React.FC<TaskListManageModalProps> = ({ onClose, onDu
                 ))}
               </div>
             )}
-            
-            {/* Sección de tareas normales */}
+
             {nonTemplates.length > 0 && (
               <div className="space-y-4">
                 <h4 className="font-semibold text-gray-800 dark:text-gray-200 text-lg border-t border-gray-200 dark:border-gray-700 pt-4">
@@ -69,8 +65,7 @@ const TaskListManageModal: React.FC<TaskListManageModalProps> = ({ onClose, onDu
                 ))}
               </div>
             )}
-            
-            {/* Mensaje cuando no hay tareas */}
+
             {templates.length === 0 && nonTemplates.length === 0 && (
               <div className="text-center text-gray-500 dark:text-gray-400 py-8">
                 <p className="mb-2">No hay plantillas ni tareas originales</p>
